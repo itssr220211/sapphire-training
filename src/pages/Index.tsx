@@ -10,6 +10,7 @@ import IndustriesSection from '@/components/IndustriesSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
+import ScrollRevealSection from '@/components/ScrollRevealSection';
 
 const Index = () => {
   const [showStartupAnimation, setShowStartupAnimation] = useState(true);
@@ -25,13 +26,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       <ModernHeader />
-      <AnimatedHero />
-      <SapphireLogoCarousel />
-      <ModernAboutSection />
-      <InteractiveSolutions />
-      <IndustriesSection />
-      <TestimonialsSection />
-      <ContactSection />
+      <ScrollRevealSection><AnimatedHero /></ScrollRevealSection>
+      <ScrollRevealSection><SapphireLogoCarousel /></ScrollRevealSection>
+      <ScrollRevealSection><ModernAboutSection /></ScrollRevealSection>
+      <ScrollRevealSection><InteractiveSolutions /></ScrollRevealSection>
+      <ScrollRevealSection><IndustriesSection /></ScrollRevealSection>
+      <ScrollRevealSection><TestimonialsSection /></ScrollRevealSection>
+      <ScrollRevealSection><ContactSection /></ScrollRevealSection>
       <Footer />
     </div>
   );
