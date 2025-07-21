@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import ScrollRevealSection from './ScrollRevealSection';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ExpandableCard } from "@/components/ui/expandable-card";
 gsap.registerPlugin(ScrollTrigger);
 const InteractiveSolutions = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -127,7 +128,100 @@ const InteractiveSolutions = () => {
         </ScrollRevealSection>
       </div>
 
-      
+      <ScrollRevealSection delay={400}>
+        {/* Cards directly under the main section headline and subtitle */}
+        <div className="my-8 flex flex-col items-center gap-8">
+          <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl justify-center">
+            <ExpandableCard
+              title="Analytics Excellence Academy"
+              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop"
+              description="Transform your data into strategic business decisions"
+              classNameExpanded="[&_h4]:text-foreground [&_h4]:font-medium"
+            >
+              <h4 className="text-lg font-semibold mb-2">What You'll Master:</h4>
+              <p className="mb-4">
+                <strong>Excel Mastery:</strong> Advanced PivotTables, Power Query, Power Pivot, and dynamic dashboard creation
+              </p>
+              <p className="mb-4">
+                <strong>Python Programming:</strong> From basics to real-world business applications and data manipulation
+              </p>
+              <p className="mb-4">
+                <strong>Power BI Expertise:</strong> Interactive dashboards, DAX functions, and cloud-based reporting
+              </p>
+              <p className="mb-4">
+                <strong>Data Analysis:</strong> Advanced sorting, filtering, and visualization techniques for informed decision-making
+              </p>
+              <h4 className="text-lg font-semibold mb-2">Learning Outcomes:</h4>
+              <p className="mb-4">
+                Create stunning, interactive business dashboards and reports
+              </p>
+              <p className="mb-4">
+                Analyze massive datasets to drive strategic business decisions
+              </p>
+              <p className="mb-4">
+                Master advanced data cleaning, sorting, and linking from multiple sources
+              </p>
+              <p className="mb-4">
+                Develop confidence in presenting data-driven insights to stakeholders
+              </p>
+              <h4 className="text-lg font-semibold mb-2">Target Audience:</h4>
+              <p>
+                Business professionals, analysts, managers, and executives seeking to leverage data for competitive advantage
+              </p>
+            </ExpandableCard>
+            <ExpandableCard
+              title="Communication Mastery"
+              src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop"
+              description="Elevate your corporate presence and leadership communication"
+              classNameExpanded="[&_h4]:text-foreground [&_h4]:font-medium"
+            >
+              <h4 className="text-lg font-semibold mb-2">Core Competencies:</h4>
+              <p className="mb-4">
+                <strong>Executive Presence:</strong> Voice modulation, body language, and commanding presentation skills
+              </p>
+              <p className="mb-4">
+                <strong>Corporate Communication:</strong> Advanced business English, professional etiquette, and cross-cultural communication
+              </p>
+              <p className="mb-4">
+                <strong>Leadership Development:</strong> Public speaking, team management, and strategic communication
+              </p>
+              <p className="mb-4">
+                <strong>Soft Skills Excellence:</strong> Emotional intelligence, conflict resolution, and stakeholder management
+              </p>
+              <h4 className="text-lg font-semibold mb-2">Specialized Programs:</h4>
+              <p className="mb-4">
+                <strong>Presentation Mastery:</strong> Advanced storytelling, audience engagement, and persuasive communication
+              </p>
+              <p className="mb-4">
+                <strong>Managerial Excellence:</strong> Leadership transactions, decision-making, and team motivation
+              </p>
+              <p className="mb-4">
+                <strong>Corporate Etiquette:</strong> Professional protocol, hospitality management, and executive effectiveness
+              </p>
+              <p className="mb-4">
+                <strong>Stress Management:</strong> Work-life balance, emotional growth, and corporate culture adaptation
+              </p>
+              <h4 className="text-lg font-semibold mb-2">Key Features:</h4>
+              <p className="mb-4">
+                Live 1:1 coaching sessions and group workshops
+              </p>
+              <p className="mb-4">
+                Industry-specific communication training for various corporate sectors
+              </p>
+              <p className="mb-4">
+                Psychometric analysis and personalized development plans
+              </p>
+              <p className="mb-4">
+                International business culture training (UK, US, Germany, Japan, etc.)
+              </p>
+              <h4 className="text-lg font-semibold mb-2">Target Audience:</h4>
+              <p>
+                C-suite executives, senior managers, team leaders, and high-potential corporate professionals seeking enhanced leadership presence and communication excellence
+              </p>
+            </ExpandableCard>
+          </div>
+        </div>
+      </ScrollRevealSection>
 
       <ScrollRevealSection delay={400}>
         <div className="text-center mt-20 px-6">

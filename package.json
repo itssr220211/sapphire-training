@@ -45,6 +45,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@react-three/drei": "^9.88.13",
     "@react-three/fiber": "^8.15.19",
+    "@remixicon/react": "^4.6.0",
     "@studio-freight/lenis": "^1.0.42",
     "@tanstack/react-query": "^5.56.2",
     "@types/three": "^0.158.0",
