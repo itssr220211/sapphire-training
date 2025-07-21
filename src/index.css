@@ -398,3 +398,49 @@
     animation: none;
   }
 }
+
+.card-grid.has-perspective {
+    perspective: 1500px;
+}
+.program-card {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.1s linear;
+}
+.program-card::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 1rem; 
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: -1;
+    background: radial-gradient(
+        350px circle at var(--mouse-x) var(--mouse-y),
+        rgba(59, 130, 246, 0.7),
+        transparent 70%
+    );
+}
+.dark .program-card::before {
+    background: radial-gradient(
+        350px circle at var(--mouse-x) var(--mouse-y),
+        rgba(255, 255, 255, 0.4),
+        transparent 70%
+    );
+}
+.program-card:not(.expanded):hover::before {
+    opacity: 1;
+}
+.card-content {
+    border-radius: 0.875rem;
+    transform: translateZ(20px); 
+    position: relative;
+    z-index: 1;
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

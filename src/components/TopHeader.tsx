@@ -25,11 +25,19 @@ const TopHeader = () => {
       }`}
     >
       <div className="flex justify-center pt-6">
-        <img 
-          src="/lovable-uploads/92e11cf9-7dbb-41a2-b4f2-38b20aef02c8.png" 
-          alt="Sapphire Training Solutions" 
-          className="h-32 w-auto drop-shadow-lg transition-all duration-300 hover:scale-105"
-        />
+        <div className="relative group">
+          <img 
+            src="/lovable-uploads/92e11cf9-7dbb-41a2-b4f2-38b20aef02c8.png" 
+            alt="Sapphire Training Solutions" 
+            className="h-40 w-auto drop-shadow-lg transition-all duration-300 group-hover:scale-110 relative z-10"
+          />
+          <img 
+            src="/lovable-uploads/92e11cf9-7dbb-41a2-b4f2-38b20aef02c8.png" 
+            alt="" 
+            className="absolute inset-0 h-40 w-auto blur-sm scale-105 opacity-0 group-hover:opacity-30 transition-opacity duration-300 -z-10 filter brightness-150"
+            style={{ filter: 'brightness(1.5) blur(2px)' }}
+          />
+        </div>
       </div>
     </header>
   );

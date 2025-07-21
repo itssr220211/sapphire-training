@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, BarChart, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ComprehensivePrograms } from "@/components/ComprehensivePrograms";
 
 const SolutionsSection = () => {
   const solutions = [
@@ -81,6 +82,9 @@ const SolutionsSection = () => {
             </Card>
           ))}
         </div>
+
+        {/* Insert ComprehensivePrograms here, above the custom solution card */}
+        <ComprehensivePrograms />
 
         <div className="text-center">
           <div className="bg-white rounded-2xl p-8 shadow-lg inline-block">
