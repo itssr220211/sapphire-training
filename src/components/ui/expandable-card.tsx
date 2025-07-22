@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
@@ -15,6 +16,30 @@ interface ExpandableCardProps {
   [key: string]: any;
 }
 
+// Utility to robustly reset scrollTop, retrying if needed
+const ensureScrollTop = (element: HTMLElement | null, maxAttempts = 5) => {
+  let attempts = 0;
+  const tryReset = () => {
+    if (!element || attempts >= maxAttempts) return;
+    // Force reflow (optional, sometimes helps)
+    const currentDisplay = element.style.display;
+    element.style.display = 'none';
+    element.offsetHeight; // Trigger reflow
+    element.style.display = currentDisplay;
+    // Set scroll position to the top
+    element.scrollTop = 0;
+    // If not at top, try again next frame
+    if (element.scrollTop > 0) {
+      attempts++;
+      requestAnimationFrame(tryReset);
+    }
+  };
+  // Start after a small delay to allow animations to begin
+  setTimeout(() => {
+    requestAnimationFrame(tryReset);
+  }, 10);
+};
+
 export function ExpandableCard({
   title,
   src,
@@ -27,6 +52,12 @@ export function ExpandableCard({
   const [active, setActive] = React.useState(false);
   const cardRef = React.useRef<HTMLDivElement>(null);
   const id = React.useId();
+  const [isClient, setIsClient] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -41,113 +72,142 @@ export function ExpandableCard({
       }
     };
 
-    window.addEventListener("keydown", onKeyDown);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
+    if (active) {
+      window.addEventListener("keydown", onKeyDown);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, []);
+  }, [active]);
+
+  React.useEffect(() => {
+    if (active) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      setTimeout(() => {
+        if (contentRef.current) {
+          contentRef.current.focus();
+        }
+      }, 0);
+    } else {
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    };
+  }, [active]);
+
+  // Robust scroll reset after card is expanded
+  React.useEffect(() => {
+    if (active) {
+      const scrollableContent = document.querySelector('.expandable-card-content') as HTMLElement | null;
+      ensureScrollTop(scrollableContent);
+    }
+  }, [active]);
+
+  // Prevent background scroll on overlay
+  const preventScroll = (e: React.UIEvent | React.WheelEvent | React.TouchEvent | React.KeyboardEvent) => {
+    if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  // Prevent scroll chaining (overscroll) on card content
+  const stopScrollChaining = (e: React.WheelEvent | React.TouchEvent) => {
+    const el = contentRef.current;
+    if (!el) return;
+    if (e.type === 'wheel') {
+      const wheel = e as React.WheelEvent;
+      const atTop = el.scrollTop === 0 && wheel.deltaY < 0;
+      const atBottom = el.scrollHeight - el.scrollTop === el.clientHeight && wheel.deltaY > 0;
+      if (atTop || atBottom) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    } else if (e.type === 'touchmove') {
+      // For touch, always prevent propagation to avoid scroll chaining
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
   return (
     <>
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-md h-full w-full z-10"
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {active && (
-          <div
-            className={cn(
-              "fixed inset-0 grid place-items-center z-[100] sm:mt-16 before:pointer-events-none",
+      {isClient && createPortal(
+        <>
+          <AnimatePresence>
+            {active && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-background/80 backdrop-blur-md h-full w-full z-40"
+                onWheel={preventScroll}
+                onTouchMove={preventScroll}
+                onKeyDown={preventScroll}
+                style={{ touchAction: 'none' }}
+              />
             )}
-          >
-            <motion.div
-              layoutId={`card-${title}-${id}`}
-              ref={cardRef}
-              className={cn(
-                "w-full max-w-[850px] h-full flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] sm:rounded-t-3xl bg-background shadow-sm border border-border relative",
-                classNameExpanded,
-              )}
-              {...props}
-            >
-              <motion.div layoutId={`image-${title}-${id}`}>
-                <div className="relative before:absolute before:inset-x-0 before:bottom-[-1px] before:h-[70px] before:z-50 before:bg-gradient-to-t before:from-background">
-                  <img
-                    src={src}
-                    alt={title}
-                    className="w-full h-80 object-cover object-center"
-                  />
-                </div>
-              </motion.div>
-              <div className="relative h-full before:fixed before:inset-x-0 before:bottom-0 before:h-[70px] before:z-50 before:bg-gradient-to-t before:from-background">
-                <div className="flex justify-between items-start p-8 h-auto">
-                  <div>
-                    <motion.p
-                      layoutId={`description-${description}-${id}`}
-                      className="text-muted-foreground text-lg"
-                    >
-                      {description}
-                    </motion.p>
-                    <motion.h3
-                      layoutId={`title-${title}-${id}`}
-                      className="font-semibold text-foreground text-4xl sm:text-4xl mt-0.5"
-                    >
-                      {title}
-                    </motion.h3>
-                  </div>
-                  <motion.button
-                    aria-label="Close card"
-                    layoutId={`button-${title}-${id}`}
-                    className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-background text-muted-foreground hover:bg-muted hover:text-foreground border border-border transition-colors duration-300 focus:outline-none"
-                    onClick={() => setActive(false)}
-                  >
-                    <motion.div
-                      animate={{ rotate: active ? 45 : 0 }}
-                      transition={{ duration: 0.4 }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14" />
-                        <path d="M12 5v14" />
-                      </svg>
-                    </motion.div>
-                  </motion.button>
-                </div>
-                <div className="relative px-6 sm:px-8">
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-muted-foreground text-base pb-10 flex flex-col items-start gap-4 overflow-auto"
-                  >
-                    {children}
+          </AnimatePresence>
+          <AnimatePresence>
+            {active && (
+              <div
+                className={cn(
+                  "fixed inset-0 grid place-items-center z-50 sm:mt-16 before:pointer-events-none",
+                )}
+                onWheel={preventScroll}
+                onTouchMove={preventScroll}
+                onKeyDown={preventScroll}
+              >
+                <motion.div
+                  layoutId={`card-${title}-${id}`}
+                  ref={cardRef}
+                  className={cn(
+                    "w-full max-w-[850px] h-full flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] sm:rounded-t-3xl bg-background shadow-sm border border-border relative",
+                    classNameExpanded,
+                  )}
+                  {...props}
+                >
+                  <motion.div layoutId={`image-${title}-${id}`}>
+                    <div className="relative before:absolute before:inset-x-0 before:bottom-[-1px] before:h-[70px] before:z-50 before:bg-gradient-to-t before:from-background">
+                      <img
+                        src={src}
+                        alt={title}
+                        className="w-full h-80 object-cover object-center"
+                      />
+                    </div>
                   </motion.div>
-                </div>
+                  <div className="relative px-6 sm:px-8 h-full">
+                    <motion.div
+                      ref={contentRef}
+                      tabIndex={0}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="expandable-card-content text-muted-foreground text-base pb-10 flex flex-col items-start gap-4 overflow-y-auto h-full hide-scrollbar focus:outline-none"
+                      style={{ height: '100%' }}
+                      onWheel={stopScrollChaining}
+                      onTouchMove={stopScrollChaining}
+                    >
+                      {children}
+                    </motion.div>
+                  </div>
+                </motion.div>
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
 
       <motion.div
         role="dialog"
@@ -239,4 +299,4 @@ export function ExpandableCard({
       </motion.div>
     </>
   );
-} 
+}
