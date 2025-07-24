@@ -46,17 +46,28 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <ModernHeader lenis={lenis} />
-      <div data-theme="dark"><ScrollRevealSection><AnimatedHero /></ScrollRevealSection></div>
-      <ScrollRevealSection><SapphireLogoCarousel /></ScrollRevealSection>
-      <ScrollRevealSection><ModernAboutSection /></ScrollRevealSection>
-      <div data-theme="dark"><ScrollRevealSection><InteractiveSolutions /></ScrollRevealSection></div>
-      <div data-theme="dark"><ScrollRevealSection><IndustriesSection /></ScrollRevealSection></div>
-      <div data-theme="dark"><ScrollRevealSection><TestimonialsSection /></ScrollRevealSection></div>
-      <ScrollRevealSection><ContactSection /></ScrollRevealSection>
-      <div data-theme="dark"><Footer /></div>
-    </div>
+    <>
+      {/* Layer 1: fixed logo */}
+      <div className="fixed-logo-background">
+        <img src="/branding/logo-bg.png" alt="Background Logo" className="background-logo-img" />
+      </div>
+
+      {/* Layer 2: scrollable content */}
+      <div id="page-wrapper" className="min-h-screen bg-white">
+        <ModernHeader lenis={lenis} />
+        <div data-theme="dark"><ScrollRevealSection><AnimatedHero /></ScrollRevealSection></div>
+        <ScrollRevealSection><SapphireLogoCarousel /></ScrollRevealSection>
+        <ScrollRevealSection><ModernAboutSection /></ScrollRevealSection>
+        <ScrollRevealSection><InteractiveSolutions /></ScrollRevealSection>
+        <ScrollRevealSection><IndustriesSection /></ScrollRevealSection>
+        <div data-theme="dark"><ScrollRevealSection><TestimonialsSection /></ScrollRevealSection></div>
+        <ScrollRevealSection><ContactSection /></ScrollRevealSection>
+        <div data-theme="dark"><Footer /></div>
+
+        {/* transparent window spacer */}
+        <div id="logo-reveal-spacer" style={{ height: '400px', background: 'transparent' }} data-theme="dark" />
+      </div>
+    </>
   );
 };
 

@@ -443,3 +443,44 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* Smooth fade/slide for bottom nav bar */
+.modern-header-nav { /* A class for the nav element */
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.modern-header-nav.nav-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(100%);
+  pointer-events: none;
+}
+
+#page-wrapper {
+  position: relative;
+  z-index: 2;
+  background: #000;
+}
+
+/* Fixed background logo layer */
+.fixed-logo-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000; /* match site background */
+  pointer-events: none;
+}
+
+.background-logo-img {
+  width: 60vw;
+  max-width: 800px;
+  height: auto;
+  opacity: 0.08;
+}
