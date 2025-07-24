@@ -45,7 +45,7 @@ const AnimatedHero = () => {
   return (
     <>
       <TopHeader />
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-900 via-sapphire to-blue-900">
+      <section id="home" className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-900 via-sapphire to-blue-900">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -63,7 +63,7 @@ const AnimatedHero = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center pt-40 lg:pt-0">
             {/* Content */}
             <div className={`space-y-8 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
               <div className="space-y-4">
@@ -72,7 +72,7 @@ const AnimatedHero = () => {
                   <span className="text-sm font-medium tracking-wider uppercase">Sapphire Training Solutions</span>
                 </div>
                 
-                <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">
+                <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', lineHeight: '1.2' }}>
                   <span className="block">
                     {animatedTexts[currentText].split(' ')[0]}
                   </span>

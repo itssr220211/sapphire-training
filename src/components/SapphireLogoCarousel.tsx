@@ -219,8 +219,10 @@ const SapphireLogoCarousel: React.FC = () => {
     }
   };
 
+  const [hovered, setHovered] = React.useState<number | null>(null);
+
   return (
-    <section className="py-20 bg-background">
+    <section id="clients" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         {/* Headline */}
         <div ref={headlineRef} className="text-center mb-16 opacity-0">
@@ -240,9 +242,7 @@ const SapphireLogoCarousel: React.FC = () => {
                 />
               </span>
               <span className="inline-flex items-center justify-center gap-x-2 min-w-fit overflow-x-visible">
-                {(() => {
-                  const [hovered, setHovered] = React.useState<number | null>(null);
-                  return SMARTER_LETTERS.map((char, i) => {
+                {SMARTER_LETTERS.map((char, i) => {
                     // Reduce scale for edge letters to prevent overflow
                     const edgeScale = (i === 0 || i === SMARTER_LETTERS.length - 1) ? 1.15 : 1.25;
                     return (
@@ -265,8 +265,7 @@ const SapphireLogoCarousel: React.FC = () => {
                         {char}
                       </motion.span>
                     );
-                  });
-                })()}
+                  })}
               </span>
             </motion.span>
             <span ref={yourNextRef} className="block opacity-0 text-gray-900 text-2xl lg:text-4xl font-semibold">
@@ -289,23 +288,6 @@ const SapphireLogoCarousel: React.FC = () => {
             className="py-12"
           />
         </div>
-        {/* Optional CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-          className="text-center mt-12"
-        >
-          <p className="text-muted-foreground mb-6">
-            Ready to join these industry leaders?
-          </p>
-          <button 
-            onClick={() => scrollToSection('contact')}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            Get Started Today
-          </button>
-        </motion.div>
       </div>
     </section>
   );

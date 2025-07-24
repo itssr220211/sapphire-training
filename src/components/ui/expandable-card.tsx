@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ExpandableCardProps {
   title: string;
@@ -13,6 +14,7 @@ interface ExpandableCardProps {
   children?: React.ReactNode;
   className?: string;
   classNameExpanded?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -54,6 +56,39 @@ export function ExpandableCard({
   const id = React.useId();
   const [isClient, setIsClient] = React.useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseX = useSpring(x, { stiffness: 350, damping: 25, mass: 0.5 });
+  const mouseY = useSpring(y, { stiffness: 350, damping: 25, mass: 0.5 });
+
+  const rotateX = useTransform(
+    mouseY,
+    [-0.5, 0.5],
+    ["15deg", "-15deg"],
+  );
+  const rotateY = useTransform(
+    mouseX,
+    [-0.5, 0.5],
+    ["-15deg", "15deg"],
+  );
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile) return;
+    const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - left) / width - 0.5;
+    const y = (event.clientY - top) / height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    if (isMobile) return;
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   React.useEffect(() => {
     setIsClient(true);
@@ -153,7 +188,7 @@ export function ExpandableCard({
                 onWheel={preventScroll}
                 onTouchMove={preventScroll}
                 onKeyDown={preventScroll}
-                style={{ touchAction: 'none' }}
+                style={{ touchAction: 'none' }} 
               />
             )}
           </AnimatePresence>
@@ -171,13 +206,38 @@ export function ExpandableCard({
                   layoutId={`card-${title}-${id}`}
                   ref={cardRef}
                   className={cn(
-                    "w-full max-w-[850px] h-full flex flex-col overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] sm:rounded-t-3xl bg-background shadow-sm border border-border relative",
+                    "w-full max-w-[850px] h-full flex flex-col overflow-hidden sm:rounded-t-3xl bg-background shadow-sm border border-border relative",
                     classNameExpanded,
                   )}
                   {...props}
                 >
+                  <button
+                    onClick={() => setActive(false)}
+                    className="absolute top-4 right-4 z-50 h-8 w-8 flex items-center justify-center rounded-full bg-background/80 text-muted-foreground hover:bg-muted hover:text-foreground border border-border transition-all"
+                  >
+                    <motion.div
+                      initial={{ rotate: 45 }}
+                      animate={{ rotate: 0 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12h14" />
+                      </svg>
+                    </motion.div>
+                  </button>
+
                   <motion.div layoutId={`image-${title}-${id}`}>
-                    <div className="relative before:absolute before:inset-x-0 before:bottom-[-1px] before:h-[70px] before:z-50 before:bg-gradient-to-t before:from-background">
+                    <div className="relative before:absolute before:inset-x-0 before:bottom-[-1px] before:h-[70px] before:z-10 before:bg-gradient-to-t before:from-background">
                       <img
                         src={src}
                         alt={title}
@@ -193,8 +253,8 @@ export function ExpandableCard({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="expandable-card-content text-muted-foreground text-base pb-10 flex flex-col items-start gap-4 overflow-y-auto h-full hide-scrollbar focus:outline-none"
-                      style={{ height: '100%' }}
+                      className="text-muted-foreground text-base pb-10 flex flex-col items-start gap-4 overflow-y-auto overscroll-contain h-full hide-scrollbar focus:outline-none px-6 sm:px-8 pt-4"
+                      style={{ height: 'calc(100% - 320px)' }} // Adjust based on image height
                       onWheel={stopScrollChaining}
                       onTouchMove={stopScrollChaining}
                     >
@@ -209,94 +269,98 @@ export function ExpandableCard({
         document.body
       )}
 
-      <motion.div
-        role="dialog"
-        aria-labelledby={`card-title-${id}`}
-        aria-modal="true"
-        layoutId={`card-${title}-${id}`}
-        onClick={() => setActive(true)}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
-          e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
-        }}
-        className={cn(
-          "p-3 flex flex-col justify-between items-center bg-background shadow-sm border border-border rounded-2xl cursor-pointer hover:shadow-md transition-shadow relative group overflow-hidden",
-          className,
-        )}
-      >
-        {/* Cursor following blue LED border effect */}
-        <div 
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          style={{
-            background: `radial-gradient(200px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(59, 130, 246, 0.15), transparent 70%)`,
+      <div style={!isMobile ? { perspective: "1200px" } : {}}>
+        <motion.div
+          role="dialog"
+          aria-labelledby={`card-title-${id}`}
+          aria-modal="true"
+          layoutId={`card-${title}-${id}`}
+          onClick={() => setActive(true)}
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+            e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+            handleMouseMove(e);
           }}
-        />
-        <div 
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border-2"
+          onMouseLeave={handleMouseLeave}
           style={{
-            borderImage: `radial-gradient(100px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(59, 130, 246, 0.8), transparent 70%) 1`,
-            background: `radial-gradient(100px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(59, 130, 246, 0.1), transparent 70%)`,
-            mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            maskComposite: 'xor'
+            transformStyle: "preserve-3d",
+            rotateX,
+            rotateY,
           }}
-        />
-        <div className="flex gap-4 flex-col">
-          <motion.div layoutId={`image-${title}-${id}`}>
-            <img
-              src={src}
-              alt={title}
-              className="w-64 h-56 rounded-lg object-cover object-center"
-            />
-          </motion.div>
-          <div className="flex justify-between items-center w-64">
-            <div className="flex flex-col flex-1 min-w-0">
-              <motion.p
-                layoutId={`description-${description}-${id}`}
-                className="text-muted-foreground md:text-left text-sm font-medium truncate"
-              >
-                {description}
-              </motion.p>
-              <motion.h3
-                layoutId={`title-${title}-${id}`}
-                className="text-foreground md:text-left font-semibold text-sm truncate"
-              >
-                {title}
-              </motion.h3>
-            </div>
-            <motion.button
-              aria-label="Open card"
-              layoutId={`button-${title}-${id}`}
-              className={cn(
-                "h-8 w-8 shrink-0 flex items-center justify-center rounded-full bg-background text-muted-foreground hover:bg-muted hover:text-foreground border border-border transition-colors duration-300 focus:outline-none ml-2",
-                className,
-              )}
+          className={cn(
+            // Changed from bg-background to bg-black and added text-white
+            "p-3 flex flex-col justify-between items-center bg-black text-white shadow-sm border border-border rounded-2xl cursor-pointer hover:shadow-md transition-shadow relative group overflow-hidden",
+            className,
+          )}
+        >
+          <div
+            className="absolute inset-0 rounded-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+            style={{
+              background: `radial-gradient(450px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(59, 130, 246, 0.4), transparent 70%)`,
+            }}
+          />
+          <div className="flex gap-4 flex-col" style={{ transformStyle: "preserve-3d", transform: "translateZ(50px)" }}>
+            <motion.div
+              layoutId={`image-${title}-${id}`}
+              className="w-80 h-72 rounded-lg object-cover object-center"
             >
-              <motion.div
-                animate={{ rotate: active ? 45 : 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <img
+                src={src}
+                alt={title}
+                className="w-80 h-72 rounded-lg object-cover object-center"
+              />
+            </motion.div>
+            <div className="flex justify-between items-center w-80">
+              <div className="flex flex-col flex-1 min-w-0">
+                <motion.p
+                  layoutId={`description-${description}-${id}`}
+                  className="md:text-left text-base font-medium truncate text-white"
                 >
-                  <path d="M5 12h14" />
-                  <path d="M12 5v14" />
-                </svg>
-              </motion.div>
-            </motion.button>
+                  {description}
+                </motion.p>
+                <motion.h3
+                  layoutId={`title-${title}-${id}`}
+                  className="md:text-left font-semibold text-base truncate text-white"
+                >
+                  {title}
+                </motion.h3>
+              </div>
+              <motion.button
+                aria-label="Open card"
+                layoutId={`button-${title}-${id}`}
+                className={cn(
+                  "h-8 w-8 shrink-0 flex items-center justify-center rounded-full bg-background text-muted-foreground hover:bg-muted hover:text-foreground border border-border transition-colors duration-300 focus:outline-none ml-2",
+                  className,
+                )}
+                style={{ transform: "translateZ(20px)" }}
+              >
+                <motion.div
+                  animate={{ rotate: active ? 45 : 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                  </svg>
+                </motion.div>
+              </motion.button>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </>
   );
 }
