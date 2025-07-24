@@ -103,7 +103,7 @@ const InteractiveSolutions = () => {
     }, sectionRef);
     return () => ctx.revert();
   }, []);
-  return <section ref={sectionRef} id="solutions" className="py-20 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+  return <section ref={sectionRef} id="solutions" className="py-20 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-6 mb-16">
         <ScrollRevealSection>
           <div className="text-center">

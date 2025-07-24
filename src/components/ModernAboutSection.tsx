@@ -29,7 +29,7 @@ const ModernAboutSection = () => {
   ];
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+    <section id="about" className="py-20 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-6">
         <ScrollRevealSection>
           <div className="text-center mb-16">
@@ -99,7 +99,7 @@ const ModernAboutSection = () => {
             </div>
             
             {/* Main card */}
-            <div className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 rounded-3xl p-8 lg:p-12 text-center text-white overflow-hidden">
+            <div className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 rounded-3xl p-8 lg:p-12 text-center text-white">
               {/* Background effects */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl"></div>

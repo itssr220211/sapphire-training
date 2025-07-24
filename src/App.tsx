@@ -13,13 +13,24 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      {/* Layer 1: The Logo (sits here) */}
+      <div className="fixed-logo-background">
+        <img
+          src="/branding/logo-bg.png" // Confirm this path is correct for your project
+          alt="Background Logo"
+          className="background-logo-img"
+        />
+      </div>
+      {/* Layer 2: The Content Wrapper (holds all page content) */}
+      <div id="page-wrapper">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );

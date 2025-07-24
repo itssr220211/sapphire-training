@@ -29,7 +29,7 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section id="testimonials" className="py-20 bg-sapphire text-white relative overflow-hidden">
+    <section id="testimonials" className="py-20 bg-sapphire text-white relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-32 h-32 border border-white rotate-45 rounded-lg"></div>

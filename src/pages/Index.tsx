@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Lenis from '@studio-freight/lenis'
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,6 +18,10 @@ import ScrollRevealSection from '@/components/ScrollRevealSection';
 const Index = () => {
   const [showStartupAnimation, setShowStartupAnimation] = useState(true);
   const [lenis, setLenis] = useState<Lenis | null>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const revealSectionRef = useRef<HTMLDivElement>(null);
+  const [revealProgress, setRevealProgress] = useState(0);
+  const [logoLoaded, setLogoLoaded] = useState(true);
 
   useEffect(() => {
     const lenisInstance = new Lenis();
@@ -37,37 +41,91 @@ const Index = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!mainContentRef.current || !revealSectionRef.current) return;
+      const footer = document.querySelector('footer');
+      if (!footer) return;
+      const footerRect = footer.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const scrollY = window.scrollY || window.pageYOffset;
+      const footerBottom = footerRect.bottom + scrollY;
+      // The reveal area is 100vh
+      const maxReveal = windowHeight;
+      const scrollPastFooter = scrollY + windowHeight - footerBottom;
+      const progress = Math.max(0, Math.min(1, scrollPastFooter / maxReveal));
+      setRevealProgress(progress);
+      // Move main content up as user scrolls past footer
+      if (mainContentRef.current) {
+        mainContentRef.current.style.transform = `translateY(-${progress * maxReveal}px)`;
+      }
+      // Fade in the hidden section as it is revealed
+      if (revealSectionRef.current) {
+        revealSectionRef.current.style.opacity = progress > 0 ? `${progress}` : '0';
+      }
+    };
+    // Throttle scroll for performance
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', onScroll);
+    window.addEventListener('resize', handleScroll);
+    handleScroll();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
+
   const handleAnimationComplete = () => {
     setShowStartupAnimation(false);
   };
+
+  // Error handling for logo image
+  const handleLogoError = () => setLogoLoaded(false);
 
   if (showStartupAnimation) {
     return <StartupAnimation onComplete={handleAnimationComplete} />;
   }
 
   return (
-    <>
-      {/* Layer 1: fixed logo */}
-      <div className="fixed-logo-background">
-        <img src="/branding/logo-bg.png" alt="Background Logo" className="background-logo-img" />
+    <div className="curtain-reveal-container">
+      <div className="main-content-wrapper" ref={mainContentRef}>
+        {/* Layer 1: fixed logo */}
+        <div className="fixed-logo-background">
+          <img src="/branding/logo-bg.png" alt="Background Logo" className="background-logo-img" />
+        </div>
+        {/* Layer 2: scrollable content */}
+        <div id="page-wrapper" className="min-h-screen bg-white">
+          <ModernHeader lenis={lenis} />
+          <div data-theme="dark"><AnimatedHero /></div>
+          <SapphireLogoCarousel />
+          <ModernAboutSection />
+          <InteractiveSolutions />
+          <IndustriesSection />
+          <div data-theme="dark"><TestimonialsSection /></div>
+          <ContactSection />
+          <div data-theme="dark"><Footer /></div>
+          <div style={{height: '100vh', width: '100vw', background: 'transparent', pointerEvents: 'none'}} />
+        </div>
       </div>
-
-      {/* Layer 2: scrollable content */}
-      <div id="page-wrapper" className="min-h-screen bg-white">
-        <ModernHeader lenis={lenis} />
-        <div data-theme="dark"><ScrollRevealSection><AnimatedHero /></ScrollRevealSection></div>
-        <ScrollRevealSection><SapphireLogoCarousel /></ScrollRevealSection>
-        <ScrollRevealSection><ModernAboutSection /></ScrollRevealSection>
-        <ScrollRevealSection><InteractiveSolutions /></ScrollRevealSection>
-        <ScrollRevealSection><IndustriesSection /></ScrollRevealSection>
-        <div data-theme="dark"><ScrollRevealSection><TestimonialsSection /></ScrollRevealSection></div>
-        <ScrollRevealSection><ContactSection /></ScrollRevealSection>
-        <div data-theme="dark"><Footer /></div>
-
-        {/* transparent window spacer */}
-        <div id="logo-reveal-spacer" style={{ height: '400px', background: 'transparent' }} data-theme="dark" />
+      <div className="hidden-reveal-section" ref={revealSectionRef} style={{ opacity: 0 }}>
+        <div className="logo-container">
+          {logoLoaded ? (
+            <img src="/branding/logo-bg.png" alt="Logo" className="reveal-logo" onError={handleLogoError} />
+          ) : (
+            <div style={{ color: '#fff', fontSize: '2rem', textAlign: 'center' }}>Logo failed to load</div>
+          )}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
